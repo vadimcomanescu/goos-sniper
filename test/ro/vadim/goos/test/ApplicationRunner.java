@@ -1,8 +1,13 @@
 package ro.vadim.goos.test;
 
+import ro.vadim.goos.Main;
+
 public class ApplicationRunner {
 	public static final String SNIPER_ID = "sniper";
 	public static final String SNIPER_PASSWORD = "sniper";
+	protected static final String XMPP_HOSTNAME = "localhost";
+	private static final String STATUS_JOINING = "joining";
+	private static final String STATUS_LOST = "losing";
 	private AuctionSniperDriver driver;
 
 	public void startBiddingIn(final FakeAuctionServer auction) {
