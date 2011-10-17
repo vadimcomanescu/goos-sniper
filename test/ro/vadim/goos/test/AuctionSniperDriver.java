@@ -1,6 +1,5 @@
 package ro.vadim.goos.test;
 
-import ro.vadim.goos.Main;
 import ro.vadim.goos.ui.MainWindow;
 
 import com.objogate.wl.swing.AWTEventQueueProber;
