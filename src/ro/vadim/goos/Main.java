@@ -1,5 +1,8 @@
 package ro.vadim.goos;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.SwingUtilities;
 
 import org.jivesoftware.smack.Chat;
@@ -21,6 +24,8 @@ public class Main {
 	public static final String ITEM_ID_AS_LOGIN = "auction-%s";
 	public static final String AUCTION_ID_FORMAT = ITEM_ID_AS_LOGIN + "@%s/"
 			+ AUCTION_RESOURCE;
+	public static final String BID_COMMAND_FORMAT = "SOLVersion: 1.1; Command: BID; Price: %d;";
+	public static final String JOIN_COMMAND_FORMAT = null;
 	private MainWindow ui;
 	private Chat noToBeGcd;
 
@@ -47,6 +52,7 @@ public class Main {
 
 	private void joinAuction(XMPPConnection connection, String itemId)
 			throws XMPPException {
+		disconnectWhenUICloses(connection);
 		Chat chat = connection.getChatManager().createChat(
 				auctionId(itemId, connection), new MessageListener() {
 					public void processMessage(Chat aChat, Message message) {
@@ -58,7 +64,16 @@ public class Main {
 					}
 				});
 		this.noToBeGcd = chat;
-		chat.sendMessage(new Message());
+		chat.sendMessage(JOIN_COMMAND_FORMAT);
+	}
+
+	private void disconnectWhenUICloses(final XMPPConnection connection) {
+		ui.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				connection.disconnect();
+			}
+		});
 	}
 
 	private static XMPPConnection connectTo(String hostname, String username,

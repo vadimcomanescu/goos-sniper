@@ -1,13 +1,13 @@
 package ro.vadim.goos.test;
 
 import ro.vadim.goos.Main;
+import ro.vadim.goos.ui.MainWindow;
 
 public class ApplicationRunner {
 	public static final String SNIPER_ID = "sniper";
 	public static final String SNIPER_PASSWORD = "sniper";
+	public static final String SNIPER_XMPP_ID = "sniper@vadims-mac.local/Auction";
 	protected static final String XMPP_HOSTNAME = "localhost";
-	private static final String STATUS_JOINING = "joining";
-	private static final String STATUS_LOST = "losing";
 	private AuctionSniperDriver driver;
 
 	public void startBiddingIn(final FakeAuctionServer auction) {
@@ -25,11 +25,15 @@ public class ApplicationRunner {
 		thread.setDaemon(true);
 		thread.start();
 		driver = new AuctionSniperDriver(1000);
-		driver.showsSniperStatus(STATUS_JOINING);
+		driver.showsSniperStatus(MainWindow.STATUS_JOINING);
 	}
 
 	public void showsSniperHasLostAuction() {
-		driver.showsSniperStatus(STATUS_LOST);
+		driver.showsSniperStatus(MainWindow.STATUS_LOST);
+	}
+
+	public void hasShownSniperIsBidding() {
+		driver.showsSniperStatus(MainWindow.STATUS_BIDDING);
 	}
 
 	public void stop() {

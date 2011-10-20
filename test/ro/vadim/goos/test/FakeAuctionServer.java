@@ -11,6 +11,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ArrayBlockingQueue;
+import org.hamcrest.Matcher;
+
+import ro.vadim.goos.Main;
+
 import static org.junit.Assert.*;
 
 public class FakeAuctionServer {
@@ -53,14 +57,23 @@ public class FakeAuctionServer {
 			messages.add(message);
 		}
 
-		public void receivesAMessage() throws InterruptedException {
-			assertThat("Message", messages.poll(5, TimeUnit.SECONDS),
-					is(notNullValue()));
+		public void receivesAMessage(Matcher<? super String> messageMatcher)
+				throws InterruptedException {
+			final Message message = messages.poll(5, TimeUnit.SECONDS);
+			assertThat("Message", message, is(notNullValue()));
+			assertThat(message.getBody(), messageMatcher);
 		}
 	}
 
-	public void hasReceivedJoinRequestFromSniper() throws InterruptedException {
-		messageListener.receivesAMessage();
+	public void hasReceivedJoinRequestFromSniper(String sniperId)
+			throws InterruptedException {
+		receivesAMessageMatching(sniperId, equalTo(Main.JOIN_COMMAND_FORMAT));
+	}
+
+	public void hasReceivedBid(int bid, String sniperId)
+			throws InterruptedException {
+		receivesAMessageMatching(sniperId,
+				equalTo(String.format(Main.BID_COMMAND_FORMAT, bid)));
 	}
 
 	public void announceClose() throws XMPPException {
@@ -69,5 +82,19 @@ public class FakeAuctionServer {
 
 	public void stop() {
 		connection.disconnect();
+	}
+
+	public void reportPrice(int price, int increment, String bidder)
+			throws XMPPException {
+		currentChat.sendMessage(new Message(String.format(
+				"SOLVersion: 1.1; Event: PRICE; "
+						+ "CurrentPrice: %d; Increment: %d; Bidder: %s;",
+				price, increment, bidder)));
+	}
+
+	private void receivesAMessageMatching(String sniperId,
+			Matcher<? super String> matcher) throws InterruptedException {
+		messageListener.receivesAMessage(matcher);
+		assertThat(currentChat.getParticipant(), equalTo(sniperId));
 	}
 }
