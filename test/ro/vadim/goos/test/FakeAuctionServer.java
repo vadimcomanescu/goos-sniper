@@ -77,7 +77,7 @@ public class FakeAuctionServer {
 	}
 
 	public void announceClose() throws XMPPException {
-		currentChat.sendMessage(new Message());
+		currentChat.sendMessage("SOLVersion: 1.1; Event: CLOSE;");
 	}
 
 	public void stop() {
@@ -86,10 +86,12 @@ public class FakeAuctionServer {
 
 	public void reportPrice(int price, int increment, String bidder)
 			throws XMPPException {
-		currentChat.sendMessage(new Message(String.format(
-				"SOLVersion: 1.1; Event: PRICE; "
-						+ "CurrentPrice: %d; Increment: %d; Bidder: %s;",
-				price, increment, bidder)));
+		String priceMessage = String.format("SOLVersion: 1.1; Event: PRICE; "
+				+ "CurrentPrice: %d; Increment: %d; Bidder: %s;", price,
+				increment, bidder);
+		Message message = new Message();
+		message.setBody(priceMessage);
+		currentChat.sendMessage(message);
 	}
 
 	private void receivesAMessageMatching(String sniperId,
