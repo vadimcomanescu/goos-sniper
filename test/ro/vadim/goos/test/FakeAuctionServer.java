@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ArrayBlockingQueue;
 import org.hamcrest.Matcher;
 
-import ro.vadim.goos.Main;
+import ro.vadim.goos.XMPPAuction;
 
 import static org.junit.Assert.*;
 
@@ -67,13 +67,13 @@ public class FakeAuctionServer {
 
 	public void hasReceivedJoinRequestFromSniper(String sniperId)
 			throws InterruptedException {
-		receivesAMessageMatching(sniperId, equalTo(Main.JOIN_COMMAND_FORMAT));
+		receivesAMessageMatching(sniperId, equalTo(XMPPAuction.JOIN_COMMAND_FORMAT));
 	}
 
 	public void hasReceivedBid(int bid, String sniperId)
 			throws InterruptedException {
 		receivesAMessageMatching(sniperId,
-				equalTo(String.format(Main.BID_COMMAND_FORMAT, bid)));
+				equalTo(String.format(XMPPAuction.BID_COMMAND_FORMAT, bid)));
 	}
 
 	public void announceClose() throws XMPPException {

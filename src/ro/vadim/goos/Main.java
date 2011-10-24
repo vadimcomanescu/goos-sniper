@@ -10,7 +10,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import ro.vadim.goos.ui.MainWindow;
 
-public class Main implements SniperListener {
+public class Main {
 
 	private static final int ARG_HOSTNAME = 0;
 	private static final int ARG_USERNAME = 1;
@@ -21,8 +21,6 @@ public class Main implements SniperListener {
 	public static final String ITEM_ID_AS_LOGIN = "auction-%s";
 	public static final String AUCTION_ID_FORMAT = ITEM_ID_AS_LOGIN + "@%s/"
 			+ AUCTION_RESOURCE;
-	public static final String BID_COMMAND_FORMAT = "SOLVersion: 1.1; Command: BID; Price: %d;";
-	public static final String JOIN_COMMAND_FORMAT = null;
 	private MainWindow ui;
 	private Chat noToBeGcd;
 
@@ -52,18 +50,10 @@ public class Main implements SniperListener {
 		final Chat chat = connection.getChatManager().createChat(
 				auctionId(itemId, connection), null);
 		this.noToBeGcd = chat;
-		Auction nullAuction = new Auction() {
-			@Override
-			public void bid(int amount) {
-				try {
-					chat.sendMessage(String.format(BID_COMMAND_FORMAT, amount));
-				} catch (XMPPException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(nullAuction, this)));
-		chat.sendMessage(JOIN_COMMAND_FORMAT);
+		Auction auction = new XMPPAuction(chat);
+		chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(
+				auction, new SniperStateDisplayer())));
+		auction.join();
 	}
 
 	private void disconnectWhenUICloses(final XMPPConnection connection) {
@@ -73,6 +63,27 @@ public class Main implements SniperListener {
 				connection.disconnect();
 			}
 		});
+	}
+
+	public class SniperStateDisplayer implements SniperListener {
+
+		@Override
+		public void sniperLost() {
+			showStatus(MainWindow.STATUS_LOST);
+		}
+
+		@Override
+		public void snipperBidding() {
+			showStatus(MainWindow.STATUS_BIDDING);
+		}
+
+		private void showStatus(final String status) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					ui.showStatus(status);
+				}
+			});
+		}
 	}
 
 	private static XMPPConnection connectTo(String hostname, String username,
@@ -86,23 +97,5 @@ public class Main implements SniperListener {
 	private static String auctionId(String itemId, XMPPConnection connection) {
 		return String.format(AUCTION_ID_FORMAT, itemId,
 				connection.getServiceName());
-	}
-
-	@Override
-	public void sniperLost() {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				ui.showStatus(MainWindow.STATUS_LOST);
-			}
-		});
-	}
-
-	@Override
-	public void snipperBidding() {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				ui.showStatus(MainWindow.STATUS_BIDDING);
-			}
-		});
 	}
 }
