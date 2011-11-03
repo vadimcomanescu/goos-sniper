@@ -1,14 +1,12 @@
 package ro.vadim.goos.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.border.LineBorder;
+import ro.vadim.goos.SniperSnapshot;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame{
@@ -47,6 +45,10 @@ public class MainWindow extends JFrame{
 
 	public void showStatus(String status) {
 		snipers.setStatusText(status);
+	}
+
+	public void sniperStatusChanged(SniperSnapshot snapshot) {
+		snipers.sniperStateChanged(snapshot);
 	}
 }
 

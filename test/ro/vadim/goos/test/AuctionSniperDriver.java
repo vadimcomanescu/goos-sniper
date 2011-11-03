@@ -7,9 +7,7 @@ import com.objogate.wl.swing.driver.JFrameDriver;
 import com.objogate.wl.swing.driver.JTableDriver;
 import com.objogate.wl.swing.gesture.GesturePerformer;
 import static com.objogate.wl.swing.matcher.JLabelTextMatcher.withLabelText;
-import static org.hamcrest.Matchers.*;
-
-
+import static com.objogate.wl.swing.matcher.IterableComponentsMatcher.matching;
 
 public class AuctionSniperDriver extends JFrameDriver {
 	
@@ -19,8 +17,10 @@ public class AuctionSniperDriver extends JFrameDriver {
 				named(MainWindow.MAIN_WINDOW_NAME), showingOnScreen()),
 				new AWTEventQueueProber(timeoutMillis, 100));
 	}
-
-	public void showsSniperStatus(String statusText) {
-		new JTableDriver(this).hasCell(withLabelText(equalTo(statusText)));
+	
+	@SuppressWarnings("unchecked")
+	public void showsSniperStatus(String itemId, int lastPrice, int lastBid, String statusText) {
+		JTableDriver table = new JTableDriver(this);
+		table.hasRow(matching(withLabelText(itemId), withLabelText(String.valueOf(lastPrice)), withLabelText(String.valueOf(lastBid)), withLabelText(statusText)));
 	}
 }

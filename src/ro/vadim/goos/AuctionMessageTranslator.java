@@ -18,7 +18,6 @@ public class AuctionMessageTranslator implements MessageListener {
 			AuctionEventListener listener) {
 		this.listener = listener;
 		this.sniperId = sniperId;
-
 	}
 
 	public void processMessage(Chat chat, Message message) {

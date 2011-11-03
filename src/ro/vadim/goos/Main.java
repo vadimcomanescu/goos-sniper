@@ -9,7 +9,6 @@ import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
-import ro.vadim.goos.test.ApplicationRunner;
 import ro.vadim.goos.ui.MainWindow;
 
 public class Main {
@@ -53,8 +52,9 @@ public class Main {
 				auctionId(itemId, connection), null);
 		this.noToBeGcd = chat;
 		Auction auction = new XMPPAuction(chat);
-		chat.addMessageListener(new AuctionMessageTranslator(connection.getUser(), new AuctionSniper(
-				auction, new SniperStateDisplayer())));
+		chat.addMessageListener(new AuctionMessageTranslator(connection
+				.getUser(), new AuctionSniper(auction,
+				new SniperStateDisplayer(), itemId)));
 		auction.join();
 	}
 
@@ -75,8 +75,8 @@ public class Main {
 		}
 
 		@Override
-		public void sniperBidding() {
-			showStatus(MainWindow.STATUS_BIDDING);
+		public void sniperWon() {
+			showStatus(MainWindow.STATUS_WON);
 		}
 
 		private void showStatus(final String status) {
@@ -88,15 +88,13 @@ public class Main {
 		}
 
 		@Override
-		public void sniperWinning() {
-			showStatus(MainWindow.STATUS_WINNING);
+		public void sniperStateChanged(final SniperSnapshot sniperSnapshot) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					ui.sniperStatusChanged(sniperSnapshot);
+				}
+			});
 		}
-
-		@Override
-		public void sniperWon() {
-			showStatus(MainWindow.STATUS_WON);
-		}
-
 	}
 
 	private static XMPPConnection connectTo(String hostname, String username,
