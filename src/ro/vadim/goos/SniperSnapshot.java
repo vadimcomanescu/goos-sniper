@@ -41,4 +41,8 @@ public class SniperSnapshot {
 	public SniperSnapshot bidding(int price, int bid) {
 		return new SniperSnapshot(this.itemId, price, bid, SniperState.BIDDING);
 	}
+
+	public SniperSnapshot closed() {
+		return new SniperSnapshot(itemId, lastPrice, lastBid, state.whenAuctionClosed());
+	}
 }

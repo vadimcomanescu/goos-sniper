@@ -26,8 +26,7 @@ public class AuctionSniperTest {
 	private final AuctionSniper sniper = new AuctionSniper(auction,
 			sniperListener, ITEM_ID);
 	private final States sniperState = context.states("sniper");
-	
-	
+
 	private Matcher<SniperSnapshot> aSniperThatIs(final SniperState state) {
 		return new FeatureMatcher<SniperSnapshot, SniperState>(equalTo(state),
 				"sniper that is ", "was") {
@@ -41,7 +40,8 @@ public class AuctionSniperTest {
 	public void reportsLostWhenAuctionClosesImmediately() {
 		context.checking(new Expectations() {
 			{
-				oneOf(sniperListener).sniperLost();
+				oneOf(sniperListener).sniperStateChanged(
+						with(aSniperThatIs(SniperState.LOST)));
 			};
 		});
 
@@ -56,7 +56,8 @@ public class AuctionSniperTest {
 				allowing(sniperListener).sniperStateChanged(
 						with(aSniperThatIs(SniperState.BIDDING)));
 				then(sniperState.is("bidding"));
-				atLeast(1).of(sniperListener).sniperLost();
+				atLeast(1).of(sniperListener).sniperStateChanged(
+						with(aSniperThatIs(SniperState.LOST)));
 				when(sniperState.is("bidding"));
 			}
 
@@ -74,7 +75,8 @@ public class AuctionSniperTest {
 				allowing(sniperListener).sniperStateChanged(
 						with(aSniperThatIs(SniperState.WINNING)));
 				then(sniperState.is("winning"));
-				atLeast(1).of(sniperListener).sniperWon();
+				atLeast(1).of(sniperListener).sniperStateChanged(
+						with(aSniperThatIs(SniperState.WON)));
 				when(sniperState.is("winning"));
 			}
 		});
@@ -106,14 +108,18 @@ public class AuctionSniperTest {
 
 	@Test
 	public void reportsWinningWhenCurrentPriceComesFromSniper() {
+
 		context.checking(new Expectations() {
 			{
 				ignoring(auction);
 				allowing(sniperListener).sniperStateChanged(
 						with(aSniperThatIs(SniperState.BIDDING)));
 				then(sniperState.is("bidding"));
-				atLeast(1).of(sniperListener).sniperStateChanged(
-						new SniperSnapshot(ITEM_ID, 135, 135, SniperState.WINNING));
+				SniperSnapshot snapshot = SniperSnapshotBuilder.aSnapshot()
+						.withItemId(ITEM_ID).withLastBid(135)
+						.withLastPrice(135).havingState(SniperState.WINNING)
+						.build();
+				atLeast(1).of(sniperListener).sniperStateChanged(snapshot);
 				when(sniperState.is("bidding"));
 			}
 		});
@@ -129,9 +135,11 @@ public class AuctionSniperTest {
 		context.checking(new Expectations() {
 			{
 				oneOf(auction).bid(bid);
-				atLeast(1).of(sniperListener).sniperStateChanged(
-						new SniperSnapshot(ITEM_ID, price, bid,
-								SniperState.BIDDING));
+				SniperSnapshot snapshot = SniperSnapshotBuilder.aSnapshot()
+						.withItemId(ITEM_ID).withLastBid(bid)
+						.withLastPrice(price).havingState(SniperState.BIDDING)
+						.build();
+				atLeast(1).of(sniperListener).sniperStateChanged(snapshot);
 			};
 		});
 

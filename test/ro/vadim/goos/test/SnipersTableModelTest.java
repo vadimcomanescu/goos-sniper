@@ -13,11 +13,9 @@ import org.jmock.integration.junit4.JMock;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import ro.vadim.goos.SniperSnapshot;
 import ro.vadim.goos.SniperState;
-import ro.vadim.goos.ui.MainWindow;
+import ro.vadim.goos.ui.Column;
 import ro.vadim.goos.ui.SnipersTableModel;
-import ro.vadim.goos.ui.SnipersTableModel.Column;
 
 @RunWith(JMock.class)
 public class SnipersTableModelTest {
@@ -29,6 +27,13 @@ public class SnipersTableModelTest {
 	@Before
 	public void attachModelListener() {
 		model.addTableModelListener(listener);
+	}
+	
+	@Test
+	public void setsUpColumnHeaders() {
+		for (Column column : Column.values()) {
+			assertEquals(column.name, model.getColumnName(column.ordinal()));
+		}
 	}
 
 	@Test
@@ -44,11 +49,14 @@ public class SnipersTableModelTest {
 			};
 		});
 
-		model.sniperStateChanged(new SniperSnapshot("item id", 555, 666, SniperState.BIDDING));
+		model.sniperStateChanged(SniperSnapshotBuilder.aSnapshot()
+				.withItemId("item id").withLastPrice(555).withLastBid(666)
+				.havingState(SniperState.BIDDING).build());
 		assertColumnEquals(Column.ITEM_IDENTIFIER, "item id");
 		assertColumnEquals(Column.LAST_PRICE, 555);
 		assertColumnEquals(Column.LAST_BID, 666);
-		assertColumnEquals(Column.SNIPER_STATE, MainWindow.STATUS_BIDDING);
+		assertColumnEquals(Column.SNIPER_STATE,
+				SnipersTableModel.textFor(SniperState.BIDDING));
 	}
 
 	private void assertColumnEquals(Column column, Object expected) {

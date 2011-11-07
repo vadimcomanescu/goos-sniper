@@ -1,5 +1,27 @@
 package ro.vadim.goos;
 
+import com.objogate.exception.Defect;
+
 public enum SniperState {
-	JOINING, BIDDING, WINNING, LOST, WON;
+
+	JOINING {
+		public SniperState whenAuctionClosed() {
+			return LOST;
+		}
+	},
+	BIDDING {
+		public SniperState whenAuctionClosed() {
+			return LOST;
+		}
+	},
+	WINNING {
+		public SniperState whenAuctionClosed() {
+			return WON;
+		}
+	},
+	LOST, WON;
+
+	public SniperState whenAuctionClosed() {
+		throw new Defect("Auction is already closed!");
+	}
 }

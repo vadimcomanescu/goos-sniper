@@ -1,10 +1,13 @@
 package ro.vadim.goos.test;
 
+import javax.swing.table.JTableHeader;
+
 import ro.vadim.goos.ui.MainWindow;
 
 import com.objogate.wl.swing.AWTEventQueueProber;
 import com.objogate.wl.swing.driver.JFrameDriver;
 import com.objogate.wl.swing.driver.JTableDriver;
+import com.objogate.wl.swing.driver.JTableHeaderDriver;
 import com.objogate.wl.swing.gesture.GesturePerformer;
 import static com.objogate.wl.swing.matcher.JLabelTextMatcher.withLabelText;
 import static com.objogate.wl.swing.matcher.IterableComponentsMatcher.matching;
@@ -23,4 +26,11 @@ public class AuctionSniperDriver extends JFrameDriver {
 		JTableDriver table = new JTableDriver(this);
 		table.hasRow(matching(withLabelText(itemId), withLabelText(String.valueOf(lastPrice)), withLabelText(String.valueOf(lastBid)), withLabelText(statusText)));
 	}
+
+	@SuppressWarnings("unchecked")
+	public void hasColumnTitles() {
+		JTableHeaderDriver headers = new JTableHeaderDriver(this, JTableHeader.class);
+		
+		headers.hasHeaders(matching(withLabelText("Item"), withLabelText("Last Price"), withLabelText("Last Bid"), withLabelText("State")));
+	} 
 }

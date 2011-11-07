@@ -10,6 +10,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
 import ro.vadim.goos.ui.MainWindow;
+import ro.vadim.goos.ui.SnipersTableModel;
 
 public class Main {
 
@@ -22,7 +23,9 @@ public class Main {
 	public static final String ITEM_ID_AS_LOGIN = "auction-%s";
 	public static final String AUCTION_ID_FORMAT = ITEM_ID_AS_LOGIN + "@%s/"
 			+ AUCTION_RESOURCE;
+	private final SnipersTableModel snipers = new SnipersTableModel();
 	private MainWindow ui;
+	@SuppressWarnings("unused")
 	private Chat noToBeGcd;
 
 	public Main() throws Exception {
@@ -33,7 +36,7 @@ public class Main {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
-				ui = new MainWindow();
+				ui = new MainWindow(snipers);
 			}
 		});
 	}
@@ -54,7 +57,7 @@ public class Main {
 		Auction auction = new XMPPAuction(chat);
 		chat.addMessageListener(new AuctionMessageTranslator(connection
 				.getUser(), new AuctionSniper(auction,
-				new SniperStateDisplayer(), itemId)));
+				new SwingThreadSniperListener(snipers), itemId)));
 		auction.join();
 	}
 
@@ -67,31 +70,19 @@ public class Main {
 		});
 	}
 
-	public class SniperStateDisplayer implements SniperListener {
+	public class SwingThreadSniperListener implements SniperListener {
 
-		@Override
-		public void sniperLost() {
-			showStatus(MainWindow.STATUS_LOST);
-		}
+		private SnipersTableModel snipers;
 
-		@Override
-		public void sniperWon() {
-			showStatus(MainWindow.STATUS_WON);
-		}
-
-		private void showStatus(final String status) {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					ui.showStatus(status);
-				}
-			});
+		public SwingThreadSniperListener(SnipersTableModel snipers) {
+			this.snipers = snipers;
 		}
 
 		@Override
 		public void sniperStateChanged(final SniperSnapshot sniperSnapshot) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					ui.sniperStatusChanged(sniperSnapshot);
+					snipers.sniperStateChanged(sniperSnapshot);
 				}
 			});
 		}

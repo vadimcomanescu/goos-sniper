@@ -3,7 +3,6 @@ package ro.vadim.goos;
 public class AuctionSniper implements AuctionEventListener {
 	private SniperListener sniperListener;
 	private Auction auction;
-	private boolean isWinning;
 	private SniperSnapshot sniperSnapshot;
 
 	public AuctionSniper(Auction auction, SniperListener sniperListener,
@@ -15,24 +14,26 @@ public class AuctionSniper implements AuctionEventListener {
 
 	@Override
 	public void auctionClosed() {
-		if (isWinning) {
-			sniperListener.sniperWon();
-		} else {
-			sniperListener.sniperLost();
-		}
+		sniperSnapshot = sniperSnapshot.closed();
+		notifyChange();
 	}
 
 	@Override
 	public void currentPrice(int price, int increment, PriceSource priceSource) {
-		isWinning = priceSource == PriceSource.FromSniper;
-		if (isWinning) {
-			sniperSnapshot = sniperSnapshot.winning(price);
-		} else {
-			final int bid = price + increment;
-			auction.bid(bid);
-			sniperSnapshot = sniperSnapshot.bidding(price, bid);
+		switch (priceSource) {
+			case FromSniper :
+				sniperSnapshot = sniperSnapshot.winning(price);
+				break;
+			case FromOtherBidder :
+				final int bid = price + increment;
+				auction.bid(bid);
+				sniperSnapshot = sniperSnapshot.bidding(price, bid);
+				break;
 		}
-		
+		notifyChange();
+	}
+
+	private void notifyChange() {
 		sniperListener.sniperStateChanged(sniperSnapshot);
 	}
 }
