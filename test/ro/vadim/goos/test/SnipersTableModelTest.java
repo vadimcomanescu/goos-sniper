@@ -16,7 +16,6 @@ import com.objogate.exception.Defect;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import ro.vadim.goos.SniperSnapshot;
-import ro.vadim.goos.SniperState;
 import ro.vadim.goos.ui.Column;
 import ro.vadim.goos.ui.SnipersTableModel;
 import static ro.vadim.goos.ui.SnipersTableModel.textFor;
@@ -24,8 +23,7 @@ import static ro.vadim.goos.ui.SnipersTableModel.textFor;
 @RunWith(JMock.class)
 public class SnipersTableModelTest {
 	private final Mockery context = new Mockery();
-	private TableModelListener listener = context
-			.mock(TableModelListener.class);
+	private TableModelListener listener = context.mock(TableModelListener.class);
 	private final SnipersTableModel model = new SnipersTableModel();
 
 	@Before
@@ -65,12 +63,12 @@ public class SnipersTableModelTest {
 	@Test
 	public void notifiesListenersWhenAddingASniper() {
 		SniperSnapshot joining = SniperSnapshot.joining("item123");
-
 		context.checking(new Expectations() {
 			{
 				one(listener).tableChanged(with(anInsertionAtRow(0)));
 			}
 		});
+		
 		assertEquals(0, model.getRowCount());
 		model.addSniper(joining);
 		assertEquals(1, model.getRowCount());
@@ -84,6 +82,7 @@ public class SnipersTableModelTest {
 				ignoring(listener);
 			}
 		});
+
 		model.addSniper(SniperSnapshot.joining("item 0"));
 		model.addSniper(SniperSnapshot.joining("item 1"));
 		assertEquals("item 0", getValueAt(0, Column.ITEM_IDENTIFIER));
@@ -97,11 +96,10 @@ public class SnipersTableModelTest {
 				ignoring(listener);
 			}
 		});
-		
+
 		model.addSniper(SniperSnapshot.joining("item 0"));
 
-		SniperSnapshot snapshotForAnotherItem = SniperSnapshotBuilder
-				.aSnapshot().withItemId("item 1").build();
+		SniperSnapshot snapshotForAnotherItem = SniperSnapshotBuilder.aSnapshot().withItemId("item 1").build();
 
 		model.sniperStateChanged(snapshotForAnotherItem);
 	}
@@ -110,8 +108,7 @@ public class SnipersTableModelTest {
 		assertEquals(snapshot.itemId, getValueAt(row, Column.ITEM_IDENTIFIER));
 		assertEquals(snapshot.lastBid, getValueAt(row, Column.LAST_BID));
 		assertEquals(snapshot.lastPrice, getValueAt(row, Column.LAST_PRICE));
-		assertEquals(textFor(snapshot.state),
-				getValueAt(row, Column.SNIPER_STATE));
+		assertEquals(textFor(snapshot.state), getValueAt(row, Column.SNIPER_STATE));
 	}
 
 	private Object getValueAt(final int rowIndex, Column column) {
@@ -119,13 +116,13 @@ public class SnipersTableModelTest {
 	}
 
 	private Matcher<TableModelEvent> anInsertionAtRow(final int row) {
-		return samePropertyValuesAs(new TableModelEvent(model, row, row,
-				TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
+		return samePropertyValuesAs(new TableModelEvent(model, row, row, TableModelEvent.ALL_COLUMNS,
+				TableModelEvent.INSERT));
 	}
 
 	private Matcher<TableModelEvent> aChangeInRow(final int row) {
-		return samePropertyValuesAs(new TableModelEvent(model, row, row,
-				TableModelEvent.ALL_COLUMNS, TableModelEvent.UPDATE));
+		return samePropertyValuesAs(new TableModelEvent(model, row, row, TableModelEvent.ALL_COLUMNS,
+				TableModelEvent.UPDATE));
 	}
 
 	private Matcher<TableModelEvent> anyInsertionEvent() {
