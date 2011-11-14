@@ -7,8 +7,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.hasProperty;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ArrayBlockingQueue;
 import org.hamcrest.Matcher;
@@ -59,9 +58,8 @@ public class FakeAuctionServer {
 
 		public void receivesAMessage(Matcher<? super String> messageMatcher)
 				throws InterruptedException {
-			final Message message = messages.poll(5, TimeUnit.SECONDS);
-			assertThat("Message", message, is(notNullValue()));
-			assertThat(message.getBody(), messageMatcher);
+			final Message message = messages.poll(2, TimeUnit.SECONDS);
+			assertThat(message, hasProperty("body", messageMatcher));
 		}
 	}
 
